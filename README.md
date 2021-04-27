@@ -5,9 +5,9 @@
 # Use
 ```
 
+//初始化
 CommonRecyclerAdapter recyclerAdapter = new CommonRecyclerAdapter();
 recyclerAdapter.addItemInfo(R.layout.item_custom_data, CustomData.class, CustomDataViewModel.class);
-recyclerView.setAdapter(recyclerAdapter);
 
 //添加自定义数据布局
 recyclerAdapter.addData(new CustomData("customData"+new Random().nextInt(100)));
