@@ -1,11 +1,10 @@
 package me.msile.train.commonrecycleradapter.adapter.model;
 
-import androidx.annotation.NonNull;
-
-import me.msile.train.commonrecycleradapter.adapter.viewmodel.RecyclerItemViewModel;
+import me.msile.train.commonrecycleradapter.adapter.holder.CommonRecyclerViewHolder;
 
 /**
  * 每个recyclerView的item的信息
+ *
  * @param <T> 数据模型
  */
 public class RecyclerItemInfoBean<T> {
@@ -13,16 +12,16 @@ public class RecyclerItemInfoBean<T> {
     //布局id
     private int layResId;
     //数据模型class
-    private @NonNull
+    private @androidx.annotation.NonNull
     Class<T> mItemDataClass;
     //布局+数据class
-    private @NonNull
-    Class<? extends RecyclerItemViewModel<T>> mItemViewModelClass;
+    private @androidx.annotation.NonNull
+    Class<? extends CommonRecyclerViewHolder<T>> mItemViewHolderClass;
 
-    public RecyclerItemInfoBean(int layResId, @NonNull Class<T> mItemDataClass, @NonNull Class<? extends RecyclerItemViewModel<T>> mItemViewModelClass) {
+    public RecyclerItemInfoBean(int layResId, @androidx.annotation.NonNull Class<T> mItemDataClass, @androidx.annotation.NonNull Class<? extends CommonRecyclerViewHolder<T>> mItemViewHolderClass) {
         this.layResId = layResId;
         this.mItemDataClass = mItemDataClass;
-        this.mItemViewModelClass = mItemViewModelClass;
+        this.mItemViewHolderClass = mItemViewHolderClass;
     }
 
     public RecyclerItemInfoBean(int layResId) {
@@ -45,12 +44,12 @@ public class RecyclerItemInfoBean<T> {
         this.layResId = layResId;
     }
 
-    public Class<? extends RecyclerItemViewModel<T>> getItemViewModelClass() {
-        return mItemViewModelClass;
+    public Class<? extends CommonRecyclerViewHolder<T>> getItemViewHolderClass() {
+        return mItemViewHolderClass;
     }
 
-    public void setItemViewModelClass(Class<? extends RecyclerItemViewModel<T>> mItemViewModelClass) {
-        this.mItemViewModelClass = mItemViewModelClass;
+    public void setItemViewHolderClass(Class<? extends CommonRecyclerViewHolder<T>> mItemViewHolderClass) {
+        this.mItemViewHolderClass = mItemViewHolderClass;
     }
 
     @Override

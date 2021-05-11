@@ -10,7 +10,7 @@ import java.util.Random;
 
 import me.msile.train.commonrecycleradapter.adapter.CommonRecyclerAdapter;
 import me.msile.train.commonrecycleradapter.custom.CustomData;
-import me.msile.train.commonrecycleradapter.custom.CustomDataViewModel;
+import me.msile.train.commonrecycleradapter.custom.CustomDataViewHolder;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private void init() {
         rvContent = findViewById(R.id.rv_content);
         recyclerAdapter = new CommonRecyclerAdapter();
-        recyclerAdapter.addItemInfo(R.layout.item_custom_data, CustomData.class, CustomDataViewModel.class);
+        recyclerAdapter.addItemInfo(R.layout.item_custom_data, CustomData.class, CustomDataViewHolder.class);
         rvContent.setAdapter(recyclerAdapter);
     }
 

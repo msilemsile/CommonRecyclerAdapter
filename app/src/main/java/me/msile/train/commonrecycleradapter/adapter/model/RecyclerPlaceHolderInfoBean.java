@@ -1,7 +1,7 @@
 package me.msile.train.commonrecycleradapter.adapter.model;
 
-import me.msile.train.commonrecycleradapter.adapter.viewmodel.RecyclerItemViewModel;
-import me.msile.train.commonrecycleradapter.adapter.viewmodel.RecyclerPlaceHolderViewModel;
+import me.msile.train.commonrecycleradapter.adapter.holder.CommonRecyclerViewHolder;
+import me.msile.train.commonrecycleradapter.adapter.holder.RecyclerPlaceViewHolder;
 
 /**
  * 占位Place Holder
@@ -12,10 +12,10 @@ public class RecyclerPlaceHolderInfoBean extends RecyclerItemInfoBean<RecyclerPl
     private Object tag;
 
     public RecyclerPlaceHolderInfoBean(int layResId) {
-        super(layResId, RecyclerPlaceHolderInfoBean.class, RecyclerPlaceHolderViewModel.class);
+        super(layResId, RecyclerPlaceHolderInfoBean.class, RecyclerPlaceViewHolder.class);
     }
 
-    public RecyclerPlaceHolderInfoBean(int layResId, Class<? extends RecyclerItemViewModel<RecyclerPlaceHolderInfoBean>> mItemViewModelClass) {
+    public RecyclerPlaceHolderInfoBean(int layResId, Class<? extends CommonRecyclerViewHolder<RecyclerPlaceHolderInfoBean>> mItemViewModelClass) {
         super(layResId, RecyclerPlaceHolderInfoBean.class, mItemViewModelClass);
     }
 

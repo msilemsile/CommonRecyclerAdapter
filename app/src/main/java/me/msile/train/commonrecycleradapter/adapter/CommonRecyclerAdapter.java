@@ -3,10 +3,11 @@ package me.msile.train.commonrecycleradapter.adapter;
 import android.content.Context;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.LayoutRes;
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.reflect.Constructor;
@@ -17,96 +18,72 @@ import java.util.List;
 import java.util.Set;
 
 import me.msile.train.commonrecycleradapter.adapter.holder.CommonRecyclerViewHolder;
-import me.msile.train.commonrecycleradapter.adapter.holder.UnknownRecyclerViewHolder;
+import me.msile.train.commonrecycleradapter.adapter.holder.RecyclerPlaceViewHolder;
+import me.msile.train.commonrecycleradapter.adapter.holder.UnknownViewHolder;
 import me.msile.train.commonrecycleradapter.adapter.model.RecyclerItemInfoBean;
 import me.msile.train.commonrecycleradapter.adapter.model.RecyclerPlaceHolderInfoBean;
-import me.msile.train.commonrecycleradapter.adapter.viewmodel.RecyclerItemViewModel;
-import me.msile.train.commonrecycleradapter.adapter.viewmodel.RecyclerPlaceHolderViewModel;
 
 /**
  * 通用recyclerAdapter
  */
 public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerViewHolder> {
 
-    public static final int MATCH_WRAP = 0;
-    public static final int WRAP_MATCH = 1;
-    public static final int MATCH_MATCH = 2;
-    public static final int WRAP_WRAP = 3;
-
     //每个item信息
     private SparseArray<RecyclerItemInfoBean> mItemInfoSA = new SparseArray<>();
     //列表数据
     private List<Object> mItemDataList = new ArrayList<>();
     //事件信息
-    private Set<ItemEventListener> mItemEventListenerList = new HashSet<>();
-    //item的布局参数
-    private int itemLayoutParams;
+    private Set<OnItemEventListener> mItemEventListenerList = new HashSet<>();
 
     public CommonRecyclerAdapter() {
     }
 
-    public void setItemLayoutParams(int itemLayoutParams) {
-        this.itemLayoutParams = itemLayoutParams;
-    }
-
-    @NonNull
+    @androidx.annotation.NonNull
     @Override
-    public CommonRecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.d("CommonRecyclerAdapter", "onCreateViewHolder");
+    public CommonRecyclerViewHolder onCreateViewHolder(@androidx.annotation.NonNull ViewGroup parent, int viewType) {
+        android.util.Log.d("CommonRecyclerAdapter", "onCreateViewHolder");
         Context context = parent.getContext();
         if (viewType == 0) {
-            return new UnknownRecyclerViewHolder(context);
+            return new UnknownViewHolder(context);
         }
         RecyclerItemInfoBean itemInfoBean = mItemInfoSA.get(viewType);
         if (itemInfoBean == null) {
-            return new UnknownRecyclerViewHolder(context);
+            return new UnknownViewHolder(context);
         }
-        Class<? extends RecyclerItemViewModel> viewModelClass = itemInfoBean.getItemViewModelClass();
-        RecyclerItemViewModel viewModelImpl = newViewModelImpl(viewModelClass, context);
-        if (viewModelImpl == null) {
-            viewModelImpl = new RecyclerPlaceHolderViewModel(context);
+        int layResId = itemInfoBean.getLayResId();
+        View itemView = LayoutInflater.from(context).inflate(layResId, parent, false);
+        if (itemView == null) {
+            return new UnknownViewHolder(context);
         }
-        viewModelImpl.inflateItemLayout(viewType);
-        viewModelImpl.setDataAdapter(this);
-        switch (itemLayoutParams) {
-            case MATCH_MATCH:
-                viewModelImpl.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.MATCH_PARENT));
-                break;
-            case WRAP_WRAP:
-                viewModelImpl.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.WRAP_CONTENT, RecyclerView.LayoutParams.WRAP_CONTENT));
-                break;
-            case WRAP_MATCH:
-                viewModelImpl.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.WRAP_CONTENT, RecyclerView.LayoutParams.MATCH_PARENT));
-                break;
-            case MATCH_WRAP:
-            default:
-                viewModelImpl.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
-                break;
+        Class<? extends CommonRecyclerViewHolder> itemViewHolderClass = itemInfoBean.getItemViewHolderClass();
+        CommonRecyclerViewHolder viewHolderImpl = newViewHolderImpl(itemViewHolderClass, itemView);
+        if (viewHolderImpl == null) {
+            return new UnknownViewHolder(context);
         }
-
-        return new CommonRecyclerViewHolder(viewModelImpl);
+        RecyclerView.LayoutParams itemLayoutParams = viewHolderImpl.getItemLayoutParams();
+        if (itemLayoutParams != null) {
+            itemView.setLayoutParams(itemLayoutParams);
+        }
+        viewHolderImpl.setDataAdapter(this);
+        return viewHolderImpl;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CommonRecyclerViewHolder holder, int position) {
-        Log.d("CommonRecyclerAdapter", "onBindViewHolder");
-        RecyclerItemViewModel viewModelImpl = holder.getViewModelImpl();
-        if (viewModelImpl == null) {
-            return;
-        }
+    public void onBindViewHolder(@androidx.annotation.NonNull CommonRecyclerViewHolder holder, int position) {
+        android.util.Log.d("CommonRecyclerAdapter", "onBindViewHolder");
         Object data = getData(position);
         if (data != null) {
-            viewModelImpl.setData(data);
+            holder.setData(data);
         }
     }
 
-    private RecyclerItemViewModel newViewModelImpl(Class<? extends RecyclerItemViewModel> viewModelClass, Context context) {
-        if (viewModelClass == null) {
+    private CommonRecyclerViewHolder newViewHolderImpl(Class<? extends CommonRecyclerViewHolder> viewHolderClass, View itemView) {
+        if (viewHolderClass == null) {
             return null;
         }
         try {
-            Constructor<? extends RecyclerItemViewModel> viewModelConstructor = viewModelClass.getConstructor(Context.class);
-            return viewModelConstructor.newInstance(context);
+            Constructor<? extends CommonRecyclerViewHolder> viewModelConstructor = viewHolderClass.getConstructor(View.class);
+            return viewModelConstructor.newInstance(itemView);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -133,7 +110,11 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         return mItemDataList.get(position);
     }
 
-    public List<Object> getDataList() {
+    public int findItemDataIndex(Object obj) {
+        return mItemDataList.indexOf(obj);
+    }
+
+    public java.util.List<Object> getDataList() {
         return mItemDataList;
     }
 
@@ -160,7 +141,7 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         return 0;
     }
 
-    public <T> void addItemInfo(@LayoutRes int layoutId, @NonNull Class<T> dataClass, @NonNull Class<? extends RecyclerItemViewModel<T>> viewModelClass) {
+    public <T> void addItemInfo(@LayoutRes int layoutId, @androidx.annotation.NonNull Class<T> dataClass, @androidx.annotation.NonNull Class<? extends CommonRecyclerViewHolder<T>> viewModelClass) {
         mItemInfoSA.put(layoutId, new RecyclerItemInfoBean<T>(layoutId, dataClass, viewModelClass));
     }
 
@@ -175,11 +156,11 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         addData(placeHolderInfoBean);
     }
 
-    public void addLayout(@LayoutRes int layoutId, @NonNull Class<? extends RecyclerPlaceHolderViewModel> viewModelClass) {
+    public void addLayout(@LayoutRes int layoutId, @androidx.annotation.NonNull Class<? extends RecyclerPlaceViewHolder> viewModelClass) {
         addLayoutWithTag(layoutId, viewModelClass, null);
     }
 
-    public void addLayoutWithTag(@LayoutRes int layoutId, @NonNull Class<? extends RecyclerPlaceHolderViewModel> viewModelClass, Object tag) {
+    public void addLayoutWithTag(@LayoutRes int layoutId, @androidx.annotation.NonNull Class<? extends RecyclerPlaceViewHolder> viewModelClass, Object tag) {
         mItemInfoSA.put(layoutId, new RecyclerPlaceHolderInfoBean(layoutId, viewModelClass));
         RecyclerPlaceHolderInfoBean placeHolderInfoBean = new RecyclerPlaceHolderInfoBean(layoutId, viewModelClass);
         placeHolderInfoBean.setTag(tag);
@@ -191,14 +172,14 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
             mItemDataList.add(obj);
             int itemCount = mItemDataList.size();
             notifyItemInserted(itemCount - 1);
-            for (ItemEventListener eventListener : mItemEventListenerList) {
+            for (OnItemEventListener eventListener : mItemEventListenerList) {
                 eventListener.onAddItemData(obj);
             }
             Log.d("CommonRecyclerAdapter", "addData");
         }
     }
 
-    public void addDataList(List objList) {
+    public void addDataList(java.util.List objList) {
         if (objList != null) {
             int beforeSize = mItemDataList.size();
             mItemDataList.addAll(objList);
@@ -206,7 +187,7 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
             if (afterSize > beforeSize) {
                 int appendSize = afterSize - beforeSize;
                 notifyItemRangeInserted(beforeSize, appendSize);
-                for (ItemEventListener eventListener : mItemEventListenerList) {
+                for (OnItemEventListener eventListener : mItemEventListenerList) {
                     eventListener.onAddItemDataList(objList);
                 }
             }
@@ -220,7 +201,7 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
             if (index != -1) {
                 mItemDataList.set(index, obj);
                 notifyItemChanged(index);
-                for (ItemEventListener eventListener : mItemEventListenerList) {
+                for (OnItemEventListener eventListener : mItemEventListenerList) {
                     eventListener.onChangeItemData(obj);
                 }
                 Log.d("CommonRecyclerAdapter", "changeData");
@@ -228,9 +209,9 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         }
     }
 
-    public void changeDataList(List objList) {
+    public void changeDataList(java.util.List objList) {
         if (objList != null) {
-            List tempChangedList = new ArrayList();
+            java.util.List tempChangedList = new ArrayList();
             boolean needUpdate = false;
             for (Object obj : objList) {
                 int index = mItemDataList.indexOf(obj);
@@ -242,7 +223,7 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
             }
             if (needUpdate) {
                 notifyDataSetChanged();
-                for (ItemEventListener eventListener : mItemEventListenerList) {
+                for (OnItemEventListener eventListener : mItemEventListenerList) {
                     eventListener.onChangeItemDataList(tempChangedList);
                 }
                 Log.d("CommonRecyclerAdapter", "changeData");
@@ -257,7 +238,7 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
             if (index != -1) {
                 mItemDataList.remove(index);
                 notifyItemRemoved(index);
-                for (ItemEventListener eventListener : mItemEventListenerList) {
+                for (OnItemEventListener eventListener : mItemEventListenerList) {
                     eventListener.onRemoveItemData(obj);
                 }
                 Log.d("CommonRecyclerAdapter", "removeData");
@@ -271,7 +252,7 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         }
         mItemDataList.clear();
         notifyDataSetChanged();
-        for (ItemEventListener eventListener : mItemEventListenerList) {
+        for (OnItemEventListener eventListener : mItemEventListenerList) {
             eventListener.onRemoveAllItemData();
         }
         Log.d("CommonRecyclerAdapter", "removeAllData");
@@ -285,23 +266,31 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         notifyItemMoved(startPosition, endPosition);
     }
 
-    public void addItemEventListener(ItemEventListener eventListener) {
+    public void addItemEventListener(OnItemEventListener eventListener) {
         if (eventListener != null) {
             mItemEventListenerList.add(eventListener);
         }
     }
 
-    public void removeItemEventListener(ItemEventListener eventListener) {
+    public void removeItemEventListener(OnItemEventListener eventListener) {
         if (eventListener != null) {
             mItemEventListenerList.remove(eventListener);
         }
     }
 
-    public Set<ItemEventListener> getItemEventListenerList() {
-        return mItemEventListenerList;
+    public void notifyItemClickListener(View view, Object obj) {
+        for (OnItemEventListener eventListener : mItemEventListenerList) {
+            eventListener.onClickItemView(view, obj);
+        }
     }
 
-    public interface ItemEventListener {
+    public void notifyItemClickListener(View view) {
+        for (OnItemEventListener eventListener : mItemEventListenerList) {
+            eventListener.onClickItemView(view);
+        }
+    }
+
+    public interface OnItemEventListener {
         default void onAddItemData(Object obj) {
         }
 
@@ -318,6 +307,12 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         }
 
         default void onChangeItemDataList(List objList) {
+        }
+
+        default void onClickItemView(View view, Object obj) {
+        }
+
+        default void onClickItemView(View view) {
         }
     }
 

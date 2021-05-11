@@ -5,25 +5,36 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import me.msile.train.commonrecycleradapter.adapter.viewmodel.RecyclerItemViewModel;
+import me.msile.train.commonrecycleradapter.adapter.CommonRecyclerAdapter;
 
 /**
- * 通用recyclerView viewHolder
+ * @param <T> 数据模型
  */
-public class CommonRecyclerViewHolder extends RecyclerView.ViewHolder {
+public abstract class CommonRecyclerViewHolder<T> extends RecyclerView.ViewHolder {
 
-    private RecyclerItemViewModel mViewModelImpl;
+    protected T mData;
+    protected CommonRecyclerAdapter mDataAdapter;
 
-    public CommonRecyclerViewHolder(RecyclerItemViewModel baseViewModel) {
-        this(baseViewModel.getView());
-        this.mViewModelImpl = baseViewModel;
-    }
-
-    CommonRecyclerViewHolder(@NonNull View itemView) {
+    public CommonRecyclerViewHolder(@NonNull View itemView) {
         super(itemView);
+        initViews(itemView);
     }
 
-    public RecyclerItemViewModel getViewModelImpl() {
-        return mViewModelImpl;
+    public void setDataAdapter(CommonRecyclerAdapter adapter) {
+        this.mDataAdapter = adapter;
     }
+
+    public void setData(T mData) {
+        this.mData = mData;
+        initData(mData);
+    }
+
+    public RecyclerView.LayoutParams getItemLayoutParams() {
+        return null;
+    }
+
+    public abstract void initViews(android.view.View itemView);
+
+    public abstract void initData(T data);
+
 }
