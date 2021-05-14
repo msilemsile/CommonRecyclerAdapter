@@ -7,6 +7,8 @@ import androidx.annotation.NonNull;
 
 import me.msile.train.commonrecycleradapter.R;
 import me.msile.train.commonrecycleradapter.adapter.holder.CommonRecyclerViewHolder;
+import me.msile.train.commonrecycleradapter.adapter.holder.RecyclerPlaceViewHolder;
+import me.msile.train.commonrecycleradapter.adapter.model.RecyclerPlaceHolderInfoBean;
 
 public class CustomDataViewHolder extends CommonRecyclerViewHolder<CustomData> {
 
@@ -24,5 +26,14 @@ public class CustomDataViewHolder extends CommonRecyclerViewHolder<CustomData> {
     @Override
     public void initData(CustomData data) {
         tvCustomData.setText("自定义数据布局: " + data.getCustomData());
+    }
+
+    public static class Factory implements CommonRecyclerViewHolder.Factory<CustomData>{
+
+        @Override
+        public CommonRecyclerViewHolder<CustomData> createViewHolder(View view) {
+            return new CustomDataViewHolder(view);
+        }
+
     }
 }

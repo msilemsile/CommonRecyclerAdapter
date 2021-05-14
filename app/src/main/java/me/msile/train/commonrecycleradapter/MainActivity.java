@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private void init() {
         rvContent = findViewById(R.id.rv_content);
         recyclerAdapter = new CommonRecyclerAdapter();
-        recyclerAdapter.addItemInfo(R.layout.item_custom_data, CustomData.class, CustomDataViewHolder.class);
+        recyclerAdapter.addItemInfo(R.layout.item_custom_data, CustomData.class, new CustomDataViewHolder.Factory());
         rvContent.setAdapter(recyclerAdapter);
     }
 

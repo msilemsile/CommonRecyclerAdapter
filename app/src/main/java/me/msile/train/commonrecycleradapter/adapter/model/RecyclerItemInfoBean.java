@@ -16,12 +16,12 @@ public class RecyclerItemInfoBean<T> {
     Class<T> mItemDataClass;
     //布局+数据class
     private @androidx.annotation.NonNull
-    Class<? extends CommonRecyclerViewHolder<T>> mItemViewHolderClass;
+    CommonRecyclerViewHolder.Factory<T> mViewHolderFactory;
 
-    public RecyclerItemInfoBean(int layResId, @androidx.annotation.NonNull Class<T> mItemDataClass, @androidx.annotation.NonNull Class<? extends CommonRecyclerViewHolder<T>> mItemViewHolderClass) {
+    public RecyclerItemInfoBean(int layResId, @androidx.annotation.NonNull Class<T> mItemDataClass, @androidx.annotation.NonNull CommonRecyclerViewHolder.Factory<T> mViewHolderFactory) {
         this.layResId = layResId;
         this.mItemDataClass = mItemDataClass;
-        this.mItemViewHolderClass = mItemViewHolderClass;
+        this.mViewHolderFactory = mViewHolderFactory;
     }
 
     public RecyclerItemInfoBean(int layResId) {
@@ -44,12 +44,12 @@ public class RecyclerItemInfoBean<T> {
         this.layResId = layResId;
     }
 
-    public Class<? extends CommonRecyclerViewHolder<T>> getItemViewHolderClass() {
-        return mItemViewHolderClass;
+    public CommonRecyclerViewHolder.Factory<T> getViewHolderFactory() {
+        return mViewHolderFactory;
     }
 
-    public void setItemViewHolderClass(Class<? extends CommonRecyclerViewHolder<T>> mItemViewHolderClass) {
-        this.mItemViewHolderClass = mItemViewHolderClass;
+    public void setViewHolderFactory(CommonRecyclerViewHolder.Factory<T> viewHolderFactory) {
+        this.mViewHolderFactory = viewHolderFactory;
     }
 
     @Override

@@ -12,11 +12,13 @@ import me.msile.train.commonrecycleradapter.adapter.CommonRecyclerAdapter;
  */
 public abstract class CommonRecyclerViewHolder<T> extends RecyclerView.ViewHolder {
 
+    protected View mItemView;
     protected T mData;
     protected CommonRecyclerAdapter mDataAdapter;
 
     public CommonRecyclerViewHolder(@NonNull View itemView) {
         super(itemView);
+        mItemView = itemView;
         initViews(itemView);
     }
 
@@ -33,8 +35,12 @@ public abstract class CommonRecyclerViewHolder<T> extends RecyclerView.ViewHolde
         return null;
     }
 
-    public abstract void initViews(android.view.View itemView);
+    public abstract void initViews(View itemView);
 
     public abstract void initData(T data);
+
+    public interface Factory<T> {
+        CommonRecyclerViewHolder<T> createViewHolder(View itemView);
+    }
 
 }

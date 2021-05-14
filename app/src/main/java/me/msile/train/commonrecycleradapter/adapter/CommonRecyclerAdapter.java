@@ -8,9 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Set;
 
 import me.msile.train.commonrecycleradapter.adapter.holder.CommonRecyclerViewHolder;
-import me.msile.train.commonrecycleradapter.adapter.holder.RecyclerPlaceViewHolder;
 import me.msile.train.commonrecycleradapter.adapter.holder.UnknownViewHolder;
 import me.msile.train.commonrecycleradapter.adapter.model.RecyclerItemInfoBean;
 import me.msile.train.commonrecycleradapter.adapter.model.RecyclerPlaceHolderInfoBean;
@@ -38,10 +37,10 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
     public CommonRecyclerAdapter() {
     }
 
-    @androidx.annotation.NonNull
+    @NonNull
     @Override
-    public CommonRecyclerViewHolder onCreateViewHolder(@androidx.annotation.NonNull ViewGroup parent, int viewType) {
-        android.util.Log.d("CommonRecyclerAdapter", "onCreateViewHolder");
+    public CommonRecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Log.d("CommonRecyclerAdapter", "onCreateViewHolder");
         Context context = parent.getContext();
         if (viewType == 0) {
             return new UnknownViewHolder(context);
@@ -55,8 +54,8 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         if (itemView == null) {
             return new UnknownViewHolder(context);
         }
-        Class<? extends CommonRecyclerViewHolder> itemViewHolderClass = itemInfoBean.getItemViewHolderClass();
-        CommonRecyclerViewHolder viewHolderImpl = newViewHolderImpl(itemViewHolderClass, itemView);
+        CommonRecyclerViewHolder.Factory viewHolderFactory = itemInfoBean.getViewHolderFactory();
+        CommonRecyclerViewHolder viewHolderImpl = viewHolderFactory.createViewHolder(itemView);
         if (viewHolderImpl == null) {
             return new UnknownViewHolder(context);
         }
@@ -69,25 +68,12 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
     }
 
     @Override
-    public void onBindViewHolder(@androidx.annotation.NonNull CommonRecyclerViewHolder holder, int position) {
-        android.util.Log.d("CommonRecyclerAdapter", "onBindViewHolder");
+    public void onBindViewHolder(@NonNull CommonRecyclerViewHolder holder, int position) {
+        Log.d("CommonRecyclerAdapter", "onBindViewHolder");
         Object data = getData(position);
         if (data != null) {
             holder.setData(data);
         }
-    }
-
-    private CommonRecyclerViewHolder newViewHolderImpl(Class<? extends CommonRecyclerViewHolder> viewHolderClass, View itemView) {
-        if (viewHolderClass == null) {
-            return null;
-        }
-        try {
-            Constructor<? extends CommonRecyclerViewHolder> viewModelConstructor = viewHolderClass.getConstructor(View.class);
-            return viewModelConstructor.newInstance(itemView);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     @Override
@@ -114,7 +100,7 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         return mItemDataList.indexOf(obj);
     }
 
-    public java.util.List<Object> getDataList() {
+    public List<Object> getDataList() {
         return mItemDataList;
     }
 
@@ -141,8 +127,8 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         return 0;
     }
 
-    public <T> void addItemInfo(@LayoutRes int layoutId, @androidx.annotation.NonNull Class<T> dataClass, @androidx.annotation.NonNull Class<? extends CommonRecyclerViewHolder<T>> viewModelClass) {
-        mItemInfoSA.put(layoutId, new RecyclerItemInfoBean<T>(layoutId, dataClass, viewModelClass));
+    public <T> void addItemInfo(@LayoutRes int layoutId, @NonNull Class<T> dataClass, @NonNull CommonRecyclerViewHolder.Factory<T> factory) {
+        mItemInfoSA.put(layoutId, new RecyclerItemInfoBean<T>(layoutId, dataClass, factory));
     }
 
     public void addLayout(@LayoutRes int layoutId) {
@@ -156,13 +142,13 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         addData(placeHolderInfoBean);
     }
 
-    public void addLayout(@LayoutRes int layoutId, @androidx.annotation.NonNull Class<? extends RecyclerPlaceViewHolder> viewModelClass) {
-        addLayoutWithTag(layoutId, viewModelClass, null);
+    public void addLayout(@LayoutRes int layoutId, @NonNull CommonRecyclerViewHolder.Factory<RecyclerPlaceHolderInfoBean> factory) {
+        addLayoutWithTag(layoutId, factory, null);
     }
 
-    public void addLayoutWithTag(@LayoutRes int layoutId, @androidx.annotation.NonNull Class<? extends RecyclerPlaceViewHolder> viewModelClass, Object tag) {
-        mItemInfoSA.put(layoutId, new RecyclerPlaceHolderInfoBean(layoutId, viewModelClass));
-        RecyclerPlaceHolderInfoBean placeHolderInfoBean = new RecyclerPlaceHolderInfoBean(layoutId, viewModelClass);
+    public void addLayoutWithTag(@LayoutRes int layoutId, @NonNull CommonRecyclerViewHolder.Factory<RecyclerPlaceHolderInfoBean> factory, Object tag) {
+        mItemInfoSA.put(layoutId, new RecyclerPlaceHolderInfoBean(layoutId, factory));
+        RecyclerPlaceHolderInfoBean placeHolderInfoBean = new RecyclerPlaceHolderInfoBean(layoutId, factory);
         placeHolderInfoBean.setTag(tag);
         addData(placeHolderInfoBean);
     }

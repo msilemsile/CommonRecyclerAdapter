@@ -6,8 +6,6 @@ import me.msile.train.commonrecycleradapter.adapter.model.RecyclerPlaceHolderInf
 
 /**
  * recyclerView itemView 占位布局(当布局不需要数据模型时)
- *
- * @param <T> 数据模型
  */
 public class RecyclerPlaceViewHolder extends CommonRecyclerViewHolder<RecyclerPlaceHolderInfoBean> {
 
@@ -22,6 +20,15 @@ public class RecyclerPlaceViewHolder extends CommonRecyclerViewHolder<RecyclerPl
 
     @Override
     public void initData(RecyclerPlaceHolderInfoBean data) {
+
+    }
+
+    public static class Factory implements CommonRecyclerViewHolder.Factory<RecyclerPlaceHolderInfoBean> {
+
+        @Override
+        public CommonRecyclerViewHolder<RecyclerPlaceHolderInfoBean> createViewHolder(View view) {
+            return new RecyclerPlaceViewHolder(view);
+        }
 
     }
 

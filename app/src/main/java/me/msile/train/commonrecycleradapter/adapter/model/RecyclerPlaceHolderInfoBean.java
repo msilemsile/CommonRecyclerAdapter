@@ -12,11 +12,11 @@ public class RecyclerPlaceHolderInfoBean extends RecyclerItemInfoBean<RecyclerPl
     private Object tag;
 
     public RecyclerPlaceHolderInfoBean(int layResId) {
-        super(layResId, RecyclerPlaceHolderInfoBean.class, RecyclerPlaceViewHolder.class);
+        super(layResId, RecyclerPlaceHolderInfoBean.class, new RecyclerPlaceViewHolder.Factory());
     }
 
-    public RecyclerPlaceHolderInfoBean(int layResId, Class<? extends CommonRecyclerViewHolder<RecyclerPlaceHolderInfoBean>> mItemViewModelClass) {
-        super(layResId, RecyclerPlaceHolderInfoBean.class, mItemViewModelClass);
+    public RecyclerPlaceHolderInfoBean(int layResId, CommonRecyclerViewHolder.Factory<RecyclerPlaceHolderInfoBean> factory) {
+        super(layResId, RecyclerPlaceHolderInfoBean.class, factory);
     }
 
     public void setTag(Object tag) {
