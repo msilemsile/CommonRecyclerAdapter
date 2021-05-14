@@ -165,7 +165,7 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         }
     }
 
-    public void addDataList(java.util.List objList) {
+    public void addDataList(List objList) {
         if (objList != null) {
             int beforeSize = mItemDataList.size();
             mItemDataList.addAll(objList);
@@ -195,9 +195,9 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         }
     }
 
-    public void changeDataList(java.util.List objList) {
+    public void changeDataList(List objList) {
         if (objList != null) {
-            java.util.List tempChangedList = new ArrayList();
+            List tempChangedList = new ArrayList();
             boolean needUpdate = false;
             for (Object obj : objList) {
                 int index = mItemDataList.indexOf(obj);

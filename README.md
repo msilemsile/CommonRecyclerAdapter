@@ -7,7 +7,7 @@
 
 //初始化
 CommonRecyclerAdapter recyclerAdapter = new CommonRecyclerAdapter();
-recyclerAdapter.addItemInfo(R.layout.item_custom_data, CustomData.class, CustomDataViewHolder.class);
+recyclerAdapter.addItemInfo(R.layout.item_custom_data, CustomData.class, new CustomDataViewHolder.Factory());
 
 //添加自定义数据布局
 recyclerAdapter.addData(new CustomData("customData"+new Random().nextInt(100)));

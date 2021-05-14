@@ -2,6 +2,8 @@ package me.msile.train.commonrecycleradapter.adapter.holder;
 
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
 import me.msile.train.commonrecycleradapter.adapter.model.RecyclerPlaceHolderInfoBean;
 
 /**
@@ -9,7 +11,7 @@ import me.msile.train.commonrecycleradapter.adapter.model.RecyclerPlaceHolderInf
  */
 public class RecyclerPlaceViewHolder extends CommonRecyclerViewHolder<RecyclerPlaceHolderInfoBean> {
 
-    public RecyclerPlaceViewHolder(@androidx.annotation.NonNull android.view.View itemView) {
+    public RecyclerPlaceViewHolder(@NonNull View itemView) {
         super(itemView);
     }
 

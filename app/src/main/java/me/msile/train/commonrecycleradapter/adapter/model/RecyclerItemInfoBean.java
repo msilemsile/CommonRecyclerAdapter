@@ -1,5 +1,7 @@
 package me.msile.train.commonrecycleradapter.adapter.model;
 
+import androidx.annotation.NonNull;
+
 import me.msile.train.commonrecycleradapter.adapter.holder.CommonRecyclerViewHolder;
 
 /**
@@ -12,10 +14,10 @@ public class RecyclerItemInfoBean<T> {
     //布局id
     private int layResId;
     //数据模型class
-    private @androidx.annotation.NonNull
+    private @NonNull
     Class<T> mItemDataClass;
     //布局+数据class
-    private @androidx.annotation.NonNull
+    private @NonNull
     CommonRecyclerViewHolder.Factory<T> mViewHolderFactory;
 
     public RecyclerItemInfoBean(int layResId, @androidx.annotation.NonNull Class<T> mItemDataClass, @androidx.annotation.NonNull CommonRecyclerViewHolder.Factory<T> mViewHolderFactory) {
