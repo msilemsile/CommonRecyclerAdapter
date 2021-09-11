@@ -25,7 +25,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:onClick="addCustomData"
-            android:text="添加数据布局"
+            android:text="数据布局"
             android:textColor="@color/black"
             android:textSize="14sp" />
 
@@ -34,8 +34,8 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:onClick="addPlaceHolder1"
-            android:text="添加占位布局1"
+            android:onClick="addSameData1"
+            android:text="sd布局1"
             android:textColor="@color/black"
             android:textSize="14sp" />
 
@@ -44,8 +44,18 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:onClick="addPlaceHolder2"
-            android:text="添加占位布局2"
+            android:onClick="addSameData2"
+            android:text="sd布局2"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:onClick="addSameData3"
+            android:text="sd布局3"
             android:textColor="@color/black"
             android:textSize="14sp" />
     </LinearLayout>

@@ -11,6 +11,11 @@ import java.util.Random;
 import me.msile.train.commonrecycleradapter.adapter.CommonRecyclerAdapter;
 import me.msile.train.commonrecycleradapter.custom.CustomData;
 import me.msile.train.commonrecycleradapter.custom.CustomDataViewHolder;
+import me.msile.train.commonrecycleradapter.samedata.SameData;
+import me.msile.train.commonrecycleradapter.samedata.SameDataViewHolder1;
+import me.msile.train.commonrecycleradapter.samedata.SameDataViewHolder2;
+import me.msile.train.commonrecycleradapter.samedata.SameDataViewHolder3;
+import me.msile.train.commonrecycleradapter.samedata.SameDataViewTypeHolder;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,8 +31,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void init() {
         rvContent = findViewById(R.id.rv_content);
-        recyclerAdapter = new CommonRecyclerAdapter();
-        recyclerAdapter.addItemInfo(R.layout.item_custom_data, CustomData.class, new CustomDataViewHolder.Factory());
+        recyclerAdapter = new CommonRecyclerAdapter(false);
+        recyclerAdapter.addViewHolderFactory(new CustomDataViewHolder.Factory());
+        recyclerAdapter.addViewHolderFactory(new SameDataViewHolder1.Factory());
+        recyclerAdapter.addViewHolderFactory(new SameDataViewHolder2.Factory());
+        recyclerAdapter.addViewHolderFactory(new SameDataViewHolder3.Factory());
+        recyclerAdapter.setItemViewTypeHolder(SameData.class,new SameDataViewTypeHolder());
         rvContent.setAdapter(recyclerAdapter);
     }
 
@@ -35,12 +44,16 @@ public class MainActivity extends AppCompatActivity {
         recyclerAdapter.addData(new CustomData("customData"+new Random().nextInt(100)));
     }
 
-    public void addPlaceHolder1(View v){
-        recyclerAdapter.addLayout(R.layout.item_place_holder_lay1);
+    public void addSameData1(View v){
+        recyclerAdapter.addData(new SameData(1));
     }
 
-    public void addPlaceHolder2(View v){
-        recyclerAdapter.addLayout(R.layout.item_place_holder_lay2);
+    public void addSameData2(View v){
+        recyclerAdapter.addData(new SameData(2));
+    }
+
+    public void addSameData3(View v){
+        recyclerAdapter.addData(new SameData(3));
     }
 
 }

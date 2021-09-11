@@ -7,34 +7,38 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import me.msile.train.commonrecycleradapter.adapter.holder.CommonRecyclerViewHolder;
+import me.msile.train.commonrecycleradapter.adapter.holder.ItemViewTypeHolder;
 import me.msile.train.commonrecycleradapter.adapter.holder.UnknownViewHolder;
-import me.msile.train.commonrecycleradapter.adapter.model.RecyclerItemInfoBean;
-import me.msile.train.commonrecycleradapter.adapter.model.RecyclerPlaceHolderInfoBean;
 
 /**
  * 通用recyclerAdapter
  */
 public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerViewHolder> {
 
-    //每个item信息
-    private SparseArray<RecyclerItemInfoBean> mItemInfoSA = new SparseArray<>();
+    //创建viewHolder的工厂
+    private SparseArray<CommonRecyclerViewHolder.Factory> mItemVHFactorySA = new SparseArray<>();
+    //相同数据模型的不同viewType数据
+    private HashMap<Class, ItemViewTypeHolder> mItemViewTypeMap = new HashMap<>();
     //列表数据
     private List<Object> mItemDataList = new ArrayList<>();
     //事件信息
     private Set<OnItemEventListener> mItemEventListenerList = new HashSet<>();
+    //是否是view_pager2
+    private boolean mIsViewPager2;
 
-    public CommonRecyclerAdapter() {
+    public CommonRecyclerAdapter(boolean mIsViewPager2) {
+        this.mIsViewPager2 = mIsViewPager2;
     }
 
     @NonNull
@@ -45,23 +49,37 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         if (viewType == 0) {
             return new UnknownViewHolder(context);
         }
-        RecyclerItemInfoBean itemInfoBean = mItemInfoSA.get(viewType);
-        if (itemInfoBean == null) {
+        CommonRecyclerViewHolder.Factory viewHolderFactory = mItemVHFactorySA.get(viewType);
+        if (viewHolderFactory == null) {
             return new UnknownViewHolder(context);
         }
-        int layResId = itemInfoBean.getLayResId();
+        int layResId = viewHolderFactory.getLayResId();
         View itemView = LayoutInflater.from(context).inflate(layResId, parent, false);
         if (itemView == null) {
             return new UnknownViewHolder(context);
         }
-        CommonRecyclerViewHolder.Factory viewHolderFactory = itemInfoBean.getViewHolderFactory();
         CommonRecyclerViewHolder viewHolderImpl = viewHolderFactory.createViewHolder(itemView);
         if (viewHolderImpl == null) {
             return new UnknownViewHolder(context);
         }
-        RecyclerView.LayoutParams itemLayoutParams = viewHolderImpl.getItemLayoutParams();
-        if (itemLayoutParams != null) {
-            itemView.setLayoutParams(itemLayoutParams);
+        viewHolderImpl.setParentView(parent);
+        ViewGroup.LayoutParams layoutParams = itemView.getLayoutParams();
+        if (mIsViewPager2) {
+            if (layoutParams == null) {
+                layoutParams = new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.MATCH_PARENT);
+                itemView.setLayoutParams(layoutParams);
+            } else {
+                if (layoutParams.width != RecyclerView.LayoutParams.MATCH_PARENT || layoutParams.height != RecyclerView.LayoutParams.MATCH_PARENT) {
+                    layoutParams.width = RecyclerView.LayoutParams.MATCH_PARENT;
+                    layoutParams.height = RecyclerView.LayoutParams.MATCH_PARENT;
+                    itemView.setLayoutParams(layoutParams);
+                }
+            }
+        } else {
+            RecyclerView.LayoutParams customLayoutParams = viewHolderImpl.getCustomLayoutParams(parent);
+            if (customLayoutParams != null) {
+                itemView.setLayoutParams(customLayoutParams);
+            }
         }
         viewHolderImpl.setDataAdapter(this);
         return viewHolderImpl;
@@ -70,6 +88,9 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
     @Override
     public void onBindViewHolder(@NonNull CommonRecyclerViewHolder holder, int position) {
         Log.d("CommonRecyclerAdapter", "onBindViewHolder");
+        if (holder instanceof UnknownViewHolder) {
+            return;
+        }
         Object data = getData(position);
         if (data != null) {
             holder.setData(data);
@@ -114,43 +135,32 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
             return 0;
         }
         Object obj = mItemDataList.get(position);
-        if (obj instanceof RecyclerPlaceHolderInfoBean) {
-            return ((RecyclerPlaceHolderInfoBean) obj).getLayResId();
+        //1.相同数据模型(自定义viewType)
+        Class<?> objClass = obj.getClass();
+        if (!mItemViewTypeMap.isEmpty()) {
+            ItemViewTypeHolder itemViewTypeHolder = mItemViewTypeMap.get(objClass);
+            if (itemViewTypeHolder != null) {
+                return itemViewTypeHolder.getItemViewType(obj);
+            }
         }
-        for (int i = 0; i < mItemInfoSA.size(); i++) {
-            RecyclerItemInfoBean itemInfoBean = mItemInfoSA.valueAt(i);
-            Class dataClass = itemInfoBean.getItemDataClass();
-            if (obj.getClass() == dataClass) {
-                return itemInfoBean.getLayResId();
+        //2.不同数据模型(不同viewType)
+        for (int i = 0; i < mItemVHFactorySA.size(); i++) {
+            CommonRecyclerViewHolder.Factory viewHolderFactory = mItemVHFactorySA.valueAt(i);
+            Class dataClass = viewHolderFactory.getItemDataClass();
+            if (objClass == dataClass) {
+                return viewHolderFactory.getLayResId();
             }
         }
         return 0;
     }
 
-    public <T> void addItemInfo(@LayoutRes int layoutId, @NonNull Class<T> dataClass, @NonNull CommonRecyclerViewHolder.Factory<T> factory) {
-        mItemInfoSA.put(layoutId, new RecyclerItemInfoBean<T>(layoutId, dataClass, factory));
+    public void addViewHolderFactory(@NonNull CommonRecyclerViewHolder.Factory factory) {
+        int layResId = factory.getLayResId();
+        mItemVHFactorySA.put(layResId, factory);
     }
 
-    public void addLayout(@LayoutRes int layoutId) {
-        addLayoutWithTag(layoutId, null);
-    }
-
-    public void addLayoutWithTag(@LayoutRes int layoutId, Object tag) {
-        mItemInfoSA.put(layoutId, new RecyclerPlaceHolderInfoBean(layoutId));
-        RecyclerPlaceHolderInfoBean placeHolderInfoBean = new RecyclerPlaceHolderInfoBean(layoutId);
-        placeHolderInfoBean.setTag(tag);
-        addData(placeHolderInfoBean);
-    }
-
-    public void addLayout(@LayoutRes int layoutId, @NonNull CommonRecyclerViewHolder.Factory<RecyclerPlaceHolderInfoBean> factory) {
-        addLayoutWithTag(layoutId, factory, null);
-    }
-
-    public void addLayoutWithTag(@LayoutRes int layoutId, @NonNull CommonRecyclerViewHolder.Factory<RecyclerPlaceHolderInfoBean> factory, Object tag) {
-        mItemInfoSA.put(layoutId, new RecyclerPlaceHolderInfoBean(layoutId, factory));
-        RecyclerPlaceHolderInfoBean placeHolderInfoBean = new RecyclerPlaceHolderInfoBean(layoutId, factory);
-        placeHolderInfoBean.setTag(tag);
-        addData(placeHolderInfoBean);
+    public void setItemViewTypeHolder(Class cla, ItemViewTypeHolder viewTypeHolder) {
+        mItemViewTypeMap.put(cla, viewTypeHolder);
     }
 
     public void addData(Object obj) {
@@ -276,6 +286,12 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         }
     }
 
+    public void notifyCustomItemEventListener(int eventId, Object obj) {
+        for (OnItemEventListener eventListener : mItemEventListenerList) {
+            eventListener.onCustomItemEvent(eventId, obj);
+        }
+    }
+
     public interface OnItemEventListener {
         default void onAddItemData(Object obj) {
         }
@@ -299,6 +315,9 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         }
 
         default void onClickItemView(View view) {
+        }
+
+        default void onCustomItemEvent(int eventId, Object obj) {
         }
     }
 
