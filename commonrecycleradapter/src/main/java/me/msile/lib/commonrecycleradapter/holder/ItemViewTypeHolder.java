@@ -1,4 +1,4 @@
-package me.msile.train.commonrecycleradapter.adapter.holder;
+package me.msile.lib.commonrecycleradapter.holder;
 
 import androidx.annotation.LayoutRes;
 

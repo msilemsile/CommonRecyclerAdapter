@@ -1,4 +1,4 @@
-package me.msile.train.commonrecycleradapter.adapter.holder;
+package me.msile.lib.commonrecycleradapter.holder;
 
 import android.content.Context;
 import android.graphics.Color;

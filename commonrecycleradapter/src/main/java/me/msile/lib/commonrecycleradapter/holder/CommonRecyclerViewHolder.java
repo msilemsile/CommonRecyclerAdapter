@@ -1,4 +1,4 @@
-package me.msile.train.commonrecycleradapter.adapter.holder;
+package me.msile.lib.commonrecycleradapter.holder;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,7 +8,7 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import me.msile.train.commonrecycleradapter.adapter.CommonRecyclerAdapter;
+import me.msile.lib.commonrecycleradapter.CommonRecyclerAdapter;
 
 /**
  * @param <T> 数据模型

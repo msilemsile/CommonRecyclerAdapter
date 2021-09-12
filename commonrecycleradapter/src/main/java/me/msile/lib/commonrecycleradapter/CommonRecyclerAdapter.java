@@ -1,4 +1,4 @@
-package me.msile.train.commonrecycleradapter.adapter;
+package me.msile.lib.commonrecycleradapter;
 
 import android.content.Context;
 import android.util.Log;
@@ -17,9 +17,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import me.msile.train.commonrecycleradapter.adapter.holder.CommonRecyclerViewHolder;
-import me.msile.train.commonrecycleradapter.adapter.holder.ItemViewTypeHolder;
-import me.msile.train.commonrecycleradapter.adapter.holder.UnknownViewHolder;
+import me.msile.lib.commonrecycleradapter.holder.CommonRecyclerViewHolder;
+import me.msile.lib.commonrecycleradapter.holder.ItemViewTypeHolder;
+import me.msile.lib.commonrecycleradapter.holder.UnknownViewHolder;
 
 /**
  * 通用recyclerAdapter

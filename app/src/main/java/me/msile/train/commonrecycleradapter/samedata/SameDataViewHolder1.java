@@ -4,9 +4,8 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
+import me.msile.lib.commonrecycleradapter.holder.CommonRecyclerViewHolder;
 import me.msile.train.commonrecycleradapter.R;
-import me.msile.train.commonrecycleradapter.adapter.holder.CommonRecyclerViewHolder;
-import me.msile.train.commonrecycleradapter.custom.CustomData;
 
 public class SameDataViewHolder1 extends CommonRecyclerViewHolder<SameData> {
 

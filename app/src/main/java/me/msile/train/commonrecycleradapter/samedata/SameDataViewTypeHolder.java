@@ -1,7 +1,7 @@
 package me.msile.train.commonrecycleradapter.samedata;
 
+import me.msile.lib.commonrecycleradapter.holder.ItemViewTypeHolder;
 import me.msile.train.commonrecycleradapter.R;
-import me.msile.train.commonrecycleradapter.adapter.holder.ItemViewTypeHolder;
 
 public class SameDataViewTypeHolder implements ItemViewTypeHolder {
     @Override

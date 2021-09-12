@@ -1,2 +1,3 @@
+include ':commonrecycleradapter'
 include ':app'
 rootProject.name = "CommonRecyclerAdapter"

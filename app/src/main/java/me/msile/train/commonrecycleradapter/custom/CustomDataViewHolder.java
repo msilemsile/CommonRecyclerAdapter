@@ -5,8 +5,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import me.msile.lib.commonrecycleradapter.holder.CommonRecyclerViewHolder;
 import me.msile.train.commonrecycleradapter.R;
-import me.msile.train.commonrecycleradapter.adapter.holder.CommonRecyclerViewHolder;
 
 public class CustomDataViewHolder extends CommonRecyclerViewHolder<CustomData> {
 

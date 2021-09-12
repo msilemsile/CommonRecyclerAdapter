@@ -1,6 +1,7 @@
-package me.msile.train.commonrecycleradapter.adapter.holder;
+package me.msile.lib.commonrecycleradapter.holder;
 
 import android.content.Context;
+import android.view.View;
 
 /**
  * 未知类型布局
@@ -12,7 +13,7 @@ public class UnknownViewHolder extends CommonRecyclerViewHolder<Object> {
     }
 
     @Override
-    public void initViews(android.view.View itemView) {
+    public void initViews(View itemView) {
 
     }
 

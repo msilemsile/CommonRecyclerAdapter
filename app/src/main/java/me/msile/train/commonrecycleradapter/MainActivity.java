@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Random;
 
-import me.msile.train.commonrecycleradapter.adapter.CommonRecyclerAdapter;
+import me.msile.lib.commonrecycleradapter.CommonRecyclerAdapter;
 import me.msile.train.commonrecycleradapter.custom.CustomData;
 import me.msile.train.commonrecycleradapter.custom.CustomDataViewHolder;
 import me.msile.train.commonrecycleradapter.samedata.SameData;
