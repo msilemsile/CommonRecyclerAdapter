@@ -1,5 +1,6 @@
 package me.msile.train.commonrecycleradapter.samedata;
 
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -15,11 +16,12 @@ public class SameDataViewHolder3 extends CommonRecyclerViewHolder<SameData> {
 
     @Override
     public void initViews(View itemView) {
+        Log.d("CRVH", "SameDataViewHolder3 initViews");
     }
 
     @Override
     public void initData(SameData data) {
-
+        Log.d("CRVH", "SameDataViewHolder3 initData");
     }
 
     public static class Factory implements CommonRecyclerViewHolder.Factory<SameData> {

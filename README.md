@@ -2,7 +2,7 @@
 
 通用recycler adapter
 
-implementation "io.github.msilemsile:commonrecycleradapter:1.0.0"
+implementation "io.github.msilemsile:commonrecycleradapter:1.1.0"
 
 # Use
 ```

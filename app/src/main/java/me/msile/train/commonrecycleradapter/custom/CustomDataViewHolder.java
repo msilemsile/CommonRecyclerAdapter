@@ -1,5 +1,6 @@
 package me.msile.train.commonrecycleradapter.custom;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -19,11 +20,13 @@ public class CustomDataViewHolder extends CommonRecyclerViewHolder<CustomData> {
     @Override
     public void initViews(View itemView) {
         tvCustomData = itemView.findViewById(R.id.tv_custom_data);
+        Log.d("CRVH", "CustomDataViewHolder initViews");
     }
 
     @Override
     public void initData(CustomData data) {
         tvCustomData.setText("自定义数据布局: " + data.getCustomData());
+        Log.d("CRVH", "CustomDataViewHolder initData");
     }
 
     public static class Factory implements CommonRecyclerViewHolder.Factory<CustomData> {

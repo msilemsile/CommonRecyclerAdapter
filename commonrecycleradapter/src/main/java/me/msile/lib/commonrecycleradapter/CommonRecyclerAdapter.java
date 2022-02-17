@@ -7,19 +7,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import me.msile.lib.commonrecycleradapter.holder.CommonRecyclerViewHolder;
 import me.msile.lib.commonrecycleradapter.holder.ItemViewTypeHolder;
-import me.msile.lib.commonrecycleradapter.holder.UnknownViewHolder;
+import me.msile.lib.commonrecycleradapter.holder.placeholder.PlaceModel;
+import me.msile.lib.commonrecycleradapter.holder.placeholder.PlaceRecyclerViewHolder;
+import me.msile.lib.commonrecycleradapter.holder.placeholder.PlaceViewTypeHolder;
+import me.msile.lib.commonrecycleradapter.holder.unknownholder.UnknownViewHolder;
 
 /**
  * 通用recyclerAdapter
@@ -28,6 +35,8 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
 
     //创建viewHolder的工厂
     private SparseArray<CommonRecyclerViewHolder.Factory> mItemVHFactorySA = new SparseArray<>();
+    //创建占位viewHolder的工厂(用于添加默认布局，addLayout，addLayoutList)
+    private SparseArray<PlaceRecyclerViewHolder.Factory> mPlaceVHFactorySA;
     //相同数据模型的不同viewType数据
     private HashMap<Class, ItemViewTypeHolder> mItemViewTypeMap = new HashMap<>();
     //列表数据
@@ -36,6 +45,8 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
     private Set<OnItemEventListener> mItemEventListenerList = new HashSet<>();
     //是否是view_pager2
     private boolean mIsViewPager2;
+    //adapter自定义特定数据（不复用,类似类成员变量,会在调用removeAllData()或者单独调用clearItemVHPrivateData方法清空)）
+    private HashMap<String, Object> mAdapterPrivateData = new HashMap<>();
 
     public CommonRecyclerAdapter(boolean mIsViewPager2) {
         this.mIsViewPager2 = mIsViewPager2;
@@ -44,14 +55,18 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
     @NonNull
     @Override
     public CommonRecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.d("CommonRecyclerAdapter", "onCreateViewHolder");
         Context context = parent.getContext();
         if (viewType == 0) {
             return new UnknownViewHolder(context);
         }
         CommonRecyclerViewHolder.Factory viewHolderFactory = mItemVHFactorySA.get(viewType);
         if (viewHolderFactory == null) {
-            return new UnknownViewHolder(context);
+            if (mPlaceVHFactorySA != null) {
+                viewHolderFactory = mPlaceVHFactorySA.get(viewType);
+            }
+            if (viewHolderFactory == null) {
+                return new UnknownViewHolder(context);
+            }
         }
         int layResId = viewHolderFactory.getLayResId();
         View itemView = LayoutInflater.from(context).inflate(layResId, parent, false);
@@ -63,6 +78,7 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
             return new UnknownViewHolder(context);
         }
         viewHolderImpl.setParentView(parent);
+        viewHolderImpl.setDataAdapter(this);
         ViewGroup.LayoutParams layoutParams = itemView.getLayoutParams();
         if (mIsViewPager2) {
             if (layoutParams == null) {
@@ -81,13 +97,11 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
                 itemView.setLayoutParams(customLayoutParams);
             }
         }
-        viewHolderImpl.setDataAdapter(this);
         return viewHolderImpl;
     }
 
     @Override
     public void onBindViewHolder(@NonNull CommonRecyclerViewHolder holder, int position) {
-        Log.d("CommonRecyclerAdapter", "onBindViewHolder");
         if (holder instanceof UnknownViewHolder) {
             return;
         }
@@ -135,6 +149,9 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
             return 0;
         }
         Object obj = mItemDataList.get(position);
+        if (obj == null) {
+            return 0;
+        }
         //1.相同数据模型(自定义viewType)
         Class<?> objClass = obj.getClass();
         if (!mItemViewTypeMap.isEmpty()) {
@@ -146,6 +163,9 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         //2.不同数据模型(不同viewType)
         for (int i = 0; i < mItemVHFactorySA.size(); i++) {
             CommonRecyclerViewHolder.Factory viewHolderFactory = mItemVHFactorySA.valueAt(i);
+            if (viewHolderFactory == null) {
+                return 0;
+            }
             Class dataClass = viewHolderFactory.getItemDataClass();
             if (objClass == dataClass) {
                 return viewHolderFactory.getLayResId();
@@ -159,8 +179,46 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         mItemVHFactorySA.put(layResId, factory);
     }
 
-    public void setItemViewTypeHolder(Class cla, ItemViewTypeHolder viewTypeHolder) {
-        mItemViewTypeMap.put(cla, viewTypeHolder);
+    public void setItemViewTypeHolder(@NonNull Class cls, @NonNull ItemViewTypeHolder typeHolder) {
+        mItemViewTypeMap.put(cls, typeHolder);
+    }
+
+    public void addLayout(@LayoutRes int layoutResId) {
+        PlaceRecyclerViewHolder.Factory factory = new PlaceRecyclerViewHolder.Factory(layoutResId);
+        addLayout(layoutResId, factory);
+    }
+
+    public void addLayoutList(@NonNull List<Integer> layoutResIdList) {
+        if (layoutResIdList.isEmpty()) {
+            return;
+        }
+        List<PlaceModel> placeModelList = new ArrayList<>();
+        for (int i = 0; i < layoutResIdList.size(); i++) {
+            int layoutResId = layoutResIdList.get(i);
+            PlaceRecyclerViewHolder.Factory factory = new PlaceRecyclerViewHolder.Factory(layoutResId);
+            if (mPlaceVHFactorySA == null) {
+                mPlaceVHFactorySA = new SparseArray<>();
+            }
+            mPlaceVHFactorySA.put(layoutResId, factory);
+            placeModelList.add(new PlaceModel(layoutResId));
+        }
+        ItemViewTypeHolder placeModelViewTypeHolder = mItemViewTypeMap.get(PlaceModel.class);
+        if (placeModelViewTypeHolder == null) {
+            mItemViewTypeMap.put(PlaceModel.class, new PlaceViewTypeHolder());
+        }
+        addDataList(placeModelList);
+    }
+
+    public void addLayout(@LayoutRes int layoutResId, @NonNull PlaceRecyclerViewHolder.Factory factory) {
+        if (mPlaceVHFactorySA == null) {
+            mPlaceVHFactorySA = new SparseArray<>();
+        }
+        mPlaceVHFactorySA.put(layoutResId, factory);
+        ItemViewTypeHolder placeModelViewTypeHolder = mItemViewTypeMap.get(PlaceModel.class);
+        if (placeModelViewTypeHolder == null) {
+            mItemViewTypeMap.put(PlaceModel.class, new PlaceViewTypeHolder());
+        }
+        addData(new PlaceModel(layoutResId));
     }
 
     public void addData(Object obj) {
@@ -242,7 +300,7 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         }
     }
 
-    public void removeAllData() {
+    public void removeAllDataWithoutPrivate() {
         if (mItemDataList.isEmpty()) {
             return;
         }
@@ -252,6 +310,28 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
             eventListener.onRemoveAllItemData();
         }
         Log.d("CommonRecyclerAdapter", "removeAllData");
+    }
+
+    public void removeAllData() {
+        clearAdapterPrivateData();
+        removeAllDataWithoutPrivate();
+    }
+
+    public void clearAdapterPrivateData() {
+        mAdapterPrivateData.clear();
+    }
+
+    public void putAdapterPrivateData(@NonNull String key, @NonNull Object value) {
+        mAdapterPrivateData.put(key, value);
+    }
+
+    public void removeAdapterPrivateData(@NonNull String key) {
+        mAdapterPrivateData.remove(key);
+    }
+
+    public @Nullable
+    Object getAdapterPrivateData(@NonNull String key) {
+        return mAdapterPrivateData.get(key);
     }
 
     public void swapItemData(int startPosition, int endPosition) {
@@ -286,9 +366,21 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         }
     }
 
-    public void notifyCustomItemEventListener(int eventId, Object obj) {
+    public void notifyItemClickListener(CommonRecyclerViewHolder viewHolder, View view, Object obj) {
         for (OnItemEventListener eventListener : mItemEventListenerList) {
-            eventListener.onCustomItemEvent(eventId, obj);
+            eventListener.onClickItemView(viewHolder, view, obj);
+        }
+    }
+
+    public void notifyItemClickListener(CommonRecyclerViewHolder viewHolder, View view) {
+        for (OnItemEventListener eventListener : mItemEventListenerList) {
+            eventListener.onClickItemView(viewHolder, view);
+        }
+    }
+
+    public void notifyCustomItemEventListener(CommonRecyclerViewHolder viewHolder, int eventId, Object obj) {
+        for (OnItemEventListener eventListener : mItemEventListenerList) {
+            eventListener.onCustomItemEvent(viewHolder, eventId, obj);
         }
     }
 
@@ -317,7 +409,13 @@ public class CommonRecyclerAdapter extends RecyclerView.Adapter<CommonRecyclerVi
         default void onClickItemView(View view) {
         }
 
-        default void onCustomItemEvent(int eventId, Object obj) {
+        default void onClickItemView(CommonRecyclerViewHolder viewHolder, View view, Object obj) {
+        }
+
+        default void onClickItemView(CommonRecyclerViewHolder viewHolder, View view) {
+        }
+
+        default void onCustomItemEvent(CommonRecyclerViewHolder viewHolder, int eventId, Object obj) {
         }
     }
 
